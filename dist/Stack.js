@@ -132,4 +132,4 @@ var Stack = function Stack(config) {
 };
 
 exports.default = Stack;
-module.exports = exports['default'];
+module.exports = exports.default;

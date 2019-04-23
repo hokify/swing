@@ -29,6 +29,7 @@ var _utilities = require('./utilities');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Hammer = void 0;
+
 if (process.browser) {
   Hammer = require('hammerjs');
 } else {
@@ -36,6 +37,7 @@ if (process.browser) {
 }
 
 var vendorPrefix = void 0;
+
 if (process.browser) {
   vendorPrefix = require('vendor-prefix');
 } else {
@@ -91,6 +93,7 @@ var Card = function Card(stack, targetElement, prepend) {
   var throwDirectionToEventName = void 0;
   var throwOutDistance = void 0;
   var throwWhere = void 0;
+  var appendedDuringMouseDown = void 0;
 
   var construct = function construct() {
     card = {};
@@ -217,10 +220,16 @@ var Card = function Card(stack, targetElement, prepend) {
       })();
     } else {
       targetElement.addEventListener('mousedown', function () {
+        appendedDuringMouseDown = Card.appendToParent(targetElement) || appendedDuringMouseDown;
         eventEmitter.trigger('panstart');
       });
 
       targetElement.addEventListener('mouseup', function () {
+        if (appendedDuringMouseDown) {
+          targetElement.click();
+          appendedDuringMouseDown = false;
+        }
+
         if (isDraging && !isPanning) {
           eventEmitter.trigger('dragend', {
             target: targetElement
@@ -343,6 +352,7 @@ var Card = function Card(stack, targetElement, prepend) {
       lastThrow.direction = direction || computeDirection(fromX, fromY, config.allowedDirections);
 
       if (where === Card.THROW_IN) {
+        Card.appendToParent(targetElement);
         springThrowIn.setCurrentValue(0).setAtRest().setEndValue(1);
 
         eventEmitter.trigger('throwin', {
@@ -350,6 +360,7 @@ var Card = function Card(stack, targetElement, prepend) {
           throwDirection: lastThrow.direction
         });
       } else if (where === Card.THROW_OUT) {
+        Card.appendToParent(targetElement);
         springThrowOut.setCurrentValue(0).setAtRest().setVelocity(100).setEndValue(1);
 
         eventEmitter.trigger('throwout', {
@@ -472,11 +483,14 @@ Card.appendToParent = function (element) {
   var parentNode = element.parentNode;
   var siblings = (0, _utilities.elementChildren)(parentNode);
   var targetIndex = siblings.indexOf(element);
+  var appended = targetIndex + 1 !== siblings.length;
 
-  if (targetIndex + 1 !== siblings.length) {
+  if (appended) {
     parentNode.removeChild(element);
     parentNode.appendChild(element);
   }
+
+  return appended;
 };
 
 /**
@@ -560,4 +574,4 @@ Card.THROW_IN = 'in';
 Card.THROW_OUT = 'out';
 
 exports.default = Card;
-module.exports = exports['default'];
+module.exports = exports.default;

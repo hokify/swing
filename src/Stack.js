@@ -116,7 +116,7 @@ const Stack = (config) => {
   stack.destroyCard = (card) => {
     eventEmitter.trigger('destroyCard', card);
 
-    return _.remove(index, {
+    return _.remove(index, { // eslint-disable-line lodash/prefer-immutable-method
       card
     });
   };

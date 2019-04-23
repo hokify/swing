@@ -1,29 +1,28 @@
 import _ from 'lodash';
 import Sister from 'sister';
-
-let Hammer;
-
-if (process.browser) {
-  Hammer = require('hammerjs');
-} else {
-  Hammer = {Manager: {}};
-}
-
 import rebound from 'rebound';
-
-let vendorPrefix;
-
-if (process.browser) {
-  vendorPrefix = require('vendor-prefix');
-} else {
-  vendorPrefix = {};
-}
 import raf from 'raf';
 import Direction from './Direction';
 import {
   elementChildren,
   isTouchDevice
 } from './utilities';
+
+let Hammer;
+
+if (process.server) {
+  Hammer = {Manager: {}};
+} else {
+  Hammer = require('hammerjs'); // eslint-disable-line global-require
+}
+
+let vendorPrefix;
+
+if (process.server) {
+  vendorPrefix = {};
+} else {
+  vendorPrefix = require('vendor-prefix'); // eslint-disable-line global-require
+}
 
 /**
  * @param {number} fromX
@@ -39,7 +38,7 @@ const computeDirection = (fromX, fromY, allowedDirections) => {
 
   const direction = isHorizontal ? isLeftDirection : isUpDirection;
 
-  if (allowedDirections.indexOf(direction) === -1) {
+  if (!allowedDirections.includes(direction)) {
     return Direction.INVALID;
   }
 
@@ -88,7 +87,7 @@ const Card = (stack, targetElement, prepend) => {
       coordinateY: 0
     };
 
-        /* Mapping directions to event names */
+    /* Mapping directions to event names */
     throwDirectionToEventName = {};
     throwDirectionToEventName[Direction.LEFT] = 'throwoutleft';
     throwDirectionToEventName[Direction.RIGHT] = 'throwoutright';
@@ -358,7 +357,7 @@ const Card = (stack, targetElement, prepend) => {
           throwDirection: lastThrow.direction
         });
 
-                /* Emits more accurate events about specific directions */
+        /* Emits more accurate events about specific directions */
         eventEmitter.trigger(throwDirectionToEventName[lastThrow.direction], {
           target: targetElement,
           throwDirection: lastThrow.direction
@@ -478,8 +477,8 @@ Card.appendToParent = (element) => {
   const appended = targetIndex + 1 !== siblings.length;
 
   if (appended) {
-    parentNode.removeChild(element);
-    parentNode.appendChild(element);
+    element.remove();
+    parentNode.append(element);
   }
 
   return appended;
@@ -493,12 +492,12 @@ Card.appendToParent = (element) => {
  * Invoked when card is added to the stack (when prepend is true).
  *
  * @param {HTMLElement} element The target element.
- * @return {undefined}
+ * @returns {undefined}
  */
 Card.prependToParent = (element) => {
   const parentNode = element.parentNode;
 
-  parentNode.removeChild(element);
+  element.remove();
   parentNode.insertBefore(element, parentNode.firstChild);
 };
 
