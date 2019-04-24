@@ -45,8 +45,12 @@
   "scripts": {
     "build": "babel ./src --out-dir ./dist --copy-files",
     "lint": "eslint ./src ./test",
-    "precommit": "npm run lint && npm run test",
     "test": "mocha --require babel-register"
   },
-  "version": "3.1.4"
+  "version": "3.1.5",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm run test"
+    }
+  }
 }
